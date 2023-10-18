@@ -1,25 +1,27 @@
-import logo from './logo.svg';
 import './App.css';
+import { Howl, Howler } from 'howler';
+import * as mobilenet from '@tensorflow-models/mobilenet';
+import * as knnClassifier from '@tensorflow-models/knn-classifier';
+// import soundURL from './assets/tieng-bip.mp3';
+
+// var sound = new Howl({
+//     src: [soundURL],
+// });
+
+// sound.play();
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    return (
+        <div className="main">
+            <video className="video" autoPlay />
+
+            <div className="control">
+                <button className="btn">Train 1</button>
+                <button className="btn">Train 2</button>
+                <button className="btn">Run</button>
+            </div>
+        </div>
+    );
 }
 
 export default App;
