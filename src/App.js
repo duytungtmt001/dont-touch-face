@@ -55,28 +55,34 @@ function App() {
     }
 
     const train = async (label) => {
-        console.log(`[${label}] Đang train cho máy mặt đẹp trai của bạn`);
         for(let i = 0; i < TRAINING_TIMES; ++i) {
             console.log(`Progress ${parseInt((i+1) / TRAINING_TIMES *100)}%`);
             await training(label);
         }
     }
 
-    const training = label => {
-        return new Promise(async (resolve) => {
-            const embedding = mobilenetModule.current.infer(
-                videoRef.current,
-                true
-            )
+    const training = async (label) => {
+        const embedding = mobilenetModule.current.infer(videoRef.current, true);
 
-            classifier.current.addExample(embedding, label);
-            await sleep(100);
-            resolve();
-        })
+        classifier.current.addExample(embedding, label);
+        await sleep(100);
     }
 
     const sleep = async (ms = 0) => {
         return new Promise(resolve => setTimeout(resolve, ms))
+    }
+
+    const run = async () => {
+        const embedding = mobilenetModule.current.infer(videoRef.current, true);
+
+        const result  = await classifier.current.predictClass(embedding);
+
+        console.log('Label: ', result.label);
+        console.log('Confidences: ', result.confidences);
+
+        await sleep(200);
+        
+        run();
     }
 
     useEffect(() => {
@@ -95,7 +101,7 @@ function App() {
             <div className="control">
                 <button className="btn" onClick={() => train(NOT_TOUCH_LABEL)}>Train 1</button>
                 <button className="btn" onClick={() => train(TOUCHED_LABEL)}>Train 2</button>
-                <button className="btn" onClick={() => {}}>Run</button>
+                <button className="btn" onClick={() => run()}>Run</button>
             </div>
         </div>
     );
