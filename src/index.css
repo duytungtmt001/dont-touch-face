@@ -9,12 +9,18 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    height: 100vh;
+    width: 100vw;
+    background-color: #333;
+}
+
+.main.active {
+    background-color: rgb(255, 0, 0);
 }
 
 .video {
-    width: 480px;
-    height: 360px;
-    background-color: #333;
+    width: 720px;
+    height: 480px;
 }
 
 .control {
@@ -26,4 +32,10 @@
     font-size: 1.4rem;
     margin: 0 8px;
     cursor: pointer;
+}
+
+.description {
+    margin-top: 12px;
+    color: #fff;
+    font-size: 24px;
 }

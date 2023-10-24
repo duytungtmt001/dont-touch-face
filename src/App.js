@@ -1,24 +1,37 @@
 import './App.css';
-import { Howl, Howler } from 'howler';
 import * as mobilenet from '@tensorflow-models/mobilenet';
 import * as knnClassifier from '@tensorflow-models/knn-classifier';
-import { useEffect, useRef } from 'react';
-// import soundURL from './assets/tieng-bip.mp3';
+import { useEffect, useRef, useState } from 'react';
 
-// var sound = new Howl({
-//     src: [soundURL],
-// });
-
-// sound.play();
 
 const NOT_TOUCH_LABEL = "not_touch";
 const TOUCHED_LABEL = "touched";
-const TRAINING_TIMES = 50;
+const TRAINING_TIMES = 10;
+
 
 function App() {
     const videoRef = useRef();
     const classifier = useRef();
     const mobilenetModule = useRef();
+    
+    
+    const [typeBtn, setTypeBtn] = useState(NOT_TOUCH_LABEL);
+    const [continueBtn, setContinueBtn] = useState(false);
+    const [description, setDescription] = useState(1);
+    const [progress, setProgress] = useState(0);
+    const [hidden, setHidden] = useState(false);
+    const [active, setActive] = useState(false);
+    const descriptionList = [
+        `Máy đang học... ${progress}%`,
+        "Bước 1: Không đeo kính và nhấn Bắt đầu để máy học nhé!",
+        "Bước 2: Đeo kính vào và nhấn Bắt đầu để máy học nhé!",
+        "AI đã sẵn sàng, hãy nhấn Khởi động",
+        "AI đang theo dõi bạn"
+    ]
+
+    const hiddenBtn = hidden ? {
+        display: "none"
+    } : {}
 
     const init = async () => {
         await setupCamera();
@@ -29,7 +42,6 @@ function App() {
         mobilenetModule.current = await mobilenet.load();
 
         console.log("Setup done");
-        console.log("Không chạm tay lên mặt và bấm Train 1");
     }
 
     const setupCamera = () => {
@@ -54,11 +66,26 @@ function App() {
         })
     }
 
+    const handleContinue = () => {
+        if(typeBtn === NOT_TOUCH_LABEL) {
+            setDescription(2)
+            setTypeBtn(TOUCHED_LABEL);
+        } else if(typeBtn === TOUCHED_LABEL) {
+            setDescription(3)
+            setTypeBtn("run");
+        }
+        setHidden(false);
+        setContinueBtn(false);
+    }
+
     const train = async (label) => {
+        setHidden(true);
+        setDescription(0);
         for(let i = 0; i < TRAINING_TIMES; ++i) {
-            console.log(`Progress ${parseInt((i+1) / TRAINING_TIMES *100)}%`);
+            setProgress(parseInt((i+1) / TRAINING_TIMES *100));
             await training(label);
         }
+        setContinueBtn(true);
     }
 
     const training = async (label) => {
@@ -73,14 +100,19 @@ function App() {
     }
 
     const run = async () => {
+        setTypeBtn("");
+        setDescription(4);
         const embedding = mobilenetModule.current.infer(videoRef.current, true);
 
         const result  = await classifier.current.predictClass(embedding);
 
-        console.log('Label: ', result.label);
-        console.log('Confidences: ', result.confidences);
+        if(result.label === TOUCHED_LABEL && result.confidences[result.label] === 1) {
+            setActive(true);
+        } else {
+            setActive(false)
+        }
 
-        await sleep(200);
+        await sleep(800);
         
         run();
     }
@@ -95,13 +127,15 @@ function App() {
     }, [])
 
     return (
-        <div className="main">
+        <div className={`main ${active ? 'active' : ''}`}>
             <video className="video" autoPlay ref={videoRef} />
 
+            <p className='description'>{descriptionList[description]}</p>
             <div className="control">
-                <button className="btn" onClick={() => train(NOT_TOUCH_LABEL)}>Train 1</button>
-                <button className="btn" onClick={() => train(TOUCHED_LABEL)}>Train 2</button>
-                <button className="btn" onClick={() => run()}>Run</button>
+                {typeBtn === NOT_TOUCH_LABEL && <button style={{...hiddenBtn}} className="btn" onClick={() => train(typeBtn)}>Bắt đầu</button>}
+                {typeBtn === TOUCHED_LABEL && <button style={{...hiddenBtn}} className="btn" onClick={() => train(typeBtn)}>Bắt đầu</button>}
+                {continueBtn && <button className="btn" onClick={handleContinue}>Tiếp tục</button>}
+                {typeBtn === "run" && <button className="btn" onClick={() => run()}>Khởi động</button>}
             </div>
         </div>
     );
