@@ -23,10 +23,10 @@ function App() {
     const [active, setActive] = useState(false);
     const descriptionList = [
         `Máy đang học... ${progress}%`,
-        "Bước 1: Không đeo kính và nhấn Bắt đầu để máy học nhé!",
-        "Bước 2: Đeo kính vào và nhấn Bắt đầu để máy học nhé!",
+        "Bước 1: Đeo khẩu trang và nhấn Bắt đầu để máy học nhé!",
+        "Bước 2: Không đeo khẩu trang vào và nhấn Bắt đầu để máy học nhé!",
         "AI đã sẵn sàng, hãy nhấn Khởi động",
-        "AI đang theo dõi bạn"
+        "Nếu không đeo khẩu trang màn hình sẽ nháy đỏ nhé!"
     ]
 
     const hiddenBtn = hidden ? {
